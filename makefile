@@ -59,6 +59,19 @@ dev.update:
 	brew upgrade solidity
 
 # #######################################################################
+# Commands to build, deploy, & run basic smart contracts.
+
+# Compile the smart contract, product binary code, and use them to generate
+# a Go source code file for Go API access.
+basic-build:
+	mkdir -p app/basic/contract/go/basic/
+	solc --abi app/basic/contract/src/basic/basic.sol -o app/basic/contract/abi/basic --overwrite
+	solc --bin app/basic/contract/src/basic/basic.sol -o app/basic/contract/abi/basic --overwrite
+	abigen --bin=app/basic/contract/abi/basic/Basic.bin --abi=app/basic/contract/abi/basic/Basic.abi \
+	--pkg=basic --out=app/basic/contract/go/basic/basic.go
+
+
+# #######################################################################
 # Go-Ethereum Commands
 
 # Start in developer mode, open UNIX socket, http calls, and JSONRPC
@@ -90,3 +103,20 @@ geth-deposit:
 	curl -H 'Content-Type: application/json' --data '{"jsonrpc":"2.0","method":"eth_sendTransaction", "params": [{"from":"0x6327A38415C53FFb36c11db55Ea74cc9cB4976Fd", "to":"0x7FDFc99999f1760e8dBd75a480B93c7B8386B79a", "value":"0x1000000000000000000"}], "id":1}' localhost:8545
 	curl -H 'Content-Type: application/json' --data '{"jsonrpc":"2.0","method":"eth_sendTransaction", "params": [{"from":"0x6327A38415C53FFb36c11db55Ea74cc9cB4976Fd", "to":"0x000cF95cB5Eb168F57D0bEFcdf6A201e3E1acea9", "value":"0x1000000000000000000"}], "id":1}' localhost:8545
 
+# #######################################################################
+test:
+	CGO_ENABLED=0 go test -count=1 ./...
+	CGO_ENABLED=0 go vet ./...
+	staticcheck -checks=all ./...
+	govulncheck ./...
+
+# This will tidy up the Go dependencies.
+tidy:
+	go mod tidy
+	go mod vendor
+
+deps-upgrade:
+	# go get $(go list -f '{{if not (or .Main .Indirect)}}{{.Path}}{{end}}' -m all)
+	go get -u -v ./...
+	go mod tidy
+	go mod vendor
