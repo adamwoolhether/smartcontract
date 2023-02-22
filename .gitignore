@@ -2,4 +2,5 @@ zarf/ethereum/geth
 *.ipc
 *.cid
 source.env
-history
+history.idea
+/zarf/ethereum/history
