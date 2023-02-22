@@ -70,6 +70,9 @@ basic-build:
 	abigen --bin=app/basic/contract/abi/basic/Basic.bin --abi=app/basic/contract/abi/basic/Basic.abi \
 	--pkg=basic --out=app/basic/contract/go/basic/basic.go
 
+# Deploy the smart contract to the locally running Eth env.
+basic-deploy:
+	CGO_ENABLED=0 go run app/basic/cmd/deploy/main.go
 
 # #######################################################################
 # Go-Ethereum Commands
