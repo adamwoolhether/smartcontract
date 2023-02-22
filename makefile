@@ -7,7 +7,8 @@
 # The coinbase address is the account to pay mining rewards to.
 # The coinbase address is give a LOT of money to start.
 #
-# These are examples of what you can do in the attach JS environment.
+# These are examples of what you can do in the attach JS environment with `geth attach`.
+#   eth
 # 	eth.getBalance("0x6327A38415C53FFb36c11db55Ea74cc9cB4976Fd") or eth.getBalance(eth.coinbase)
 # 	eth.getBalance("0x8e113078adf6888b7ba84967f299f29aece24c55")
 # 	eth.getBalance("0x0070742ff6003c3e809e78d524f0fe5dcc5ba7f7")
@@ -16,6 +17,19 @@
 #   eth.blockNumber
 #   eth.getBlockByNumber(8)
 #   eth.getTransaction("0xaea41e7c13a7ea627169c74ade4d5ea86664ff1f740cd90e499f3f842656d4ad")
+#
+# https://etherscan.io/gastracker
+# If you want something to go through soon, have a base fee (~30) and the priority fee or tip of 1 gwei
+# Priority fee doesn't do much i've noticed and is always around 1-3 gwei. I've been setting that base fee higher.
+#
+#  Unit	                Wei Value	 Wei
+#  wei	                1 wei        1
+#  Kwei (babbage)	    1e3 wei	     1,000
+#  Mwei (lovelace)	    1e6 wei	     1,000,000
+#  Gwei (shannon)	    1e9 wei	     1,000,000,000
+#  microether (szabo)	1e12 wei	 1,000,000,000,000
+#  milliether (finney)	1e15 wei	 1,000,000,000,000,000
+#  ether	            1e18 wei	 1,000,000,000,000,000,000
 #
 
 # #######################################################################
@@ -37,7 +51,8 @@ dev.update:
 # Go-Ethereum Commands
 
 # Start in developer mode, open UNIX socket, http calls, and JSONRPC
-# A Coinbase account is given to unlock in the dev env.
+# A Coinbase account is given to unlock in the dev env. We're not
+# requiring transactions to be signed with `rpc.allowed-unprotected-txs`
 geth-up:
 	geth --dev --ipcpath zarf/ethereum/geth.ipc \
 	--http.corsdomain '*' --http --allow-insecure-unlock --rpc.allow-unprotected-txs \
