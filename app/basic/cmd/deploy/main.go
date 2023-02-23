@@ -81,8 +81,9 @@ func run() (err error) {
 	// /////////////////////////////////////////////////////////////
 
 	const gasLimit = 1_600_000
+	const gasPriceWei = 39.576 // Current price as of feb 18
 	const valueGwei = 0.0
-	txOpts, err := client.NewTransactOpts(ctx, gasLimit, nil, big.NewFloat(valueGwei))
+	txOpts, err := client.NewTransactOpts(ctx, gasLimit, currency.GWei2Wei(big.NewFloat(gasPriceWei)), big.NewFloat(valueGwei))
 	if err != nil {
 		return err
 	}
