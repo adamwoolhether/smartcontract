@@ -83,6 +83,10 @@ basic-write:
 basic-read:
 	CGO_ENABLED=0 go run app/basic/cmd/read/main.go
 
+basic-test:
+	cd app/basic/contract/go/basic; \
+	gotest . -v
+
 # #######################################################################
 # Go-Ethereum Commands
 
