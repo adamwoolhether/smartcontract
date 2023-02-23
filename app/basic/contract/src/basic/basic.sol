@@ -22,7 +22,7 @@ contract Basic {
 
     // SetItem is an external-only function that accepts a key/value
     // pair and updates the contract's internal storage accordingly.
-    function SetItems(string memory key, uint256 value) external {
+    function SetItem(string memory key, uint256 value) external {
         Items[key] = value;
         emit ItemSet(key, value);
     }

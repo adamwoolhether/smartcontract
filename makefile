@@ -74,6 +74,13 @@ basic-build:
 basic-deploy:
 	CGO_ENABLED=0 go run app/basic/cmd/deploy/main.go
 
+# Execute a simple program to test access to the smart contract API.
+basic-write:
+	CGO_ENABLED=0 go run app/basic/cmd/write/main.go
+
+basic-read:
+	CGO_ENABLED=0 go run app/basic/cmd/read/main.go
+
 # #######################################################################
 # Go-Ethereum Commands
 
