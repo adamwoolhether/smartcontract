@@ -14,10 +14,11 @@ import (
 )
 
 const (
-	keyStoreFile     = "zarf/ethereum/keystore/UTC--2022-05-12T14-47-50.112225000Z--6327a38415c53ffb36c11db55ea74cc9cb4976fd"
-	passPhrase       = "123"
-	coinMarketCapKey = ""
+	keyStoreFile = "zarf/ethereum/keystore/UTC--2022-05-12T14-47-50.112225000Z--6327a38415c53ffb36c11db55ea74cc9cb4976fd"
+	passPhrase   = "123"
 )
+
+var coinMarketCapKey = os.Getenv("CMC_API_KEY")
 
 func main() {
 	if err := run(); err != nil {
@@ -54,7 +55,7 @@ func run() (err error) {
 
 	// /////////////////////////////////////////////////////////////
 
-	converter, err := currency.NewConverter(basic.BasicABI, coinMarketCapKey)
+	converter, err := currency.NewConverter(basic.BasicMetaData.ABI, coinMarketCapKey)
 	if err != nil {
 		return err
 	}

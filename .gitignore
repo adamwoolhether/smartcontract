@@ -4,3 +4,5 @@ zarf/ethereum/geth
 source.env
 history.idea
 /zarf/ethereum/history
+makefile.def
+.idea/

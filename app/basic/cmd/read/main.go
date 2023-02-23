@@ -7,16 +7,15 @@ import (
 	"log"
 	"os"
 
-	"github.com/adamwoolhether/smartcontract/app/basic/contract/go/basic"
 	"github.com/ardanlabs/ethereum"
-	"github.com/ardanlabs/ethereum/currency"
 	"github.com/ethereum/go-ethereum/common"
+
+	"github.com/adamwoolhether/smartcontract/app/basic/contract/go/basic"
 )
 
 const (
-	keyStoreFile     = "zarf/ethereum/keystore/UTC--2022-05-12T14-47-50.112225000Z--6327a38415c53ffb36c11db55ea74cc9cb4976fd"
-	passPhrase       = "123"
-	coinMarketCapKey = ""
+	keyStoreFile = "zarf/ethereum/keystore/UTC--2022-05-12T14-47-50.112225000Z--6327a38415c53ffb36c11db55ea74cc9cb4976fd"
+	passPhrase   = "123"
 )
 
 func main() {
@@ -54,25 +53,14 @@ func run() error {
 
 	// /////////////////////////////////////////////////////////////
 
-	converter, err := currency.NewConverter(basic.BasicABI, coinMarketCapKey)
-	if err != nil {
-		return err
-	}
-	oneETHtoUSD, oneUSDtoETH := converter.Values()
-
-	fmt.Println("oneETHtoUSD:", oneETHtoUSD)
-	fmt.Println("oneUSDtoETH:", oneUSDtoETH)
-
-	// /////////////////////////////////////////////////////////////
-
 	contractIDBytes, err := os.ReadFile("zarf/ethereum/basic.cid")
 	if err != nil {
-		return err
+		return fmt.Errorf("importing basic.cid file: %w", err)
 	}
 
 	contractID := string(contractIDBytes)
 	if contractID == "" {
-		return errors.New("invalid basic.cid file")
+		return errors.New("need to export the basic.cid file")
 	}
 	fmt.Println("contractID:", contractID)
 
