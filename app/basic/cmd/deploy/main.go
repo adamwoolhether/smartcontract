@@ -6,11 +6,11 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/adamwoolhether/smartcontract/foundation/ethereum"
-	"github.com/adamwoolhether/smartcontract/foundation/ethereum/currency"
 	"github.com/ethereum/go-ethereum/log"
 
 	"github.com/adamwoolhether/smartcontract/app/basic/contract/go/basic"
+	"github.com/adamwoolhether/smartcontract/foundation/ethereum"
+	"github.com/adamwoolhether/smartcontract/foundation/ethereum/currency"
 )
 
 const (

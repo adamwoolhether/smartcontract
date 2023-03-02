@@ -78,6 +78,18 @@ func (c *Client) Balance(ctx context.Context) (wei *big.Int, err error) {
 
 // /////////////////////////////////////////////////////////////////
 
+// NewCallOpts constructs a new CallOpts to call contract methods
+// that don't require a transaction.
+func (c *Client) NewCallOpts(ctx context.Context) (*bind.CallOpts, error) {
+	call := bind.CallOpts{
+		Pending: true,
+		From:    c.address,
+		Context: ctx,
+	}
+
+	return &call, nil
+}
+
 // NewTransactOpts constructs a new TransactOpts - a collection of authorization data
 // required for creating a valid Ethereum transaction. If gasLimit is set to 0, then
 // the amount of gas needed will be estimated. If gasPrice is set to 0, then the

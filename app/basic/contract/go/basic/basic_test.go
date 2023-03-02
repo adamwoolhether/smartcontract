@@ -5,10 +5,9 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ardanlabs/ethereum"
-	"github.com/ardanlabs/ethereum/currency"
-
 	"github.com/adamwoolhether/smartcontract/app/basic/contract/go/basic"
+	"github.com/adamwoolhether/smartcontract/foundation/ethereum"
+	"github.com/adamwoolhether/smartcontract/foundation/ethereum/currency"
 )
 
 func TestBasic(t *testing.T) {
