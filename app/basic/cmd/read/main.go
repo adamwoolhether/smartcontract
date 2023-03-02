@@ -7,10 +7,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/ardanlabs/ethereum"
-	"github.com/ethereum/go-ethereum/common"
-
 	"github.com/adamwoolhether/smartcontract/app/basic/contract/go/basic"
+	"github.com/adamwoolhether/smartcontract/foundation/ethereum"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 const (

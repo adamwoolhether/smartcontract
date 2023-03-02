@@ -6,8 +6,8 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/ardanlabs/ethereum"
-	"github.com/ardanlabs/ethereum/currency"
+	"github.com/adamwoolhether/smartcontract/foundation/ethereum"
+	"github.com/adamwoolhether/smartcontract/foundation/ethereum/currency"
 	"github.com/ethereum/go-ethereum/log"
 
 	"github.com/adamwoolhether/smartcontract/app/basic/contract/go/basic"
