@@ -88,6 +88,19 @@ basic-test:
 	gotest . -v
 
 # #######################################################################
+# Commands to build, deploy, & run the bank-single smart contracts.
+
+bank-single-build:
+	mkdir -p app/bank/single/contract/go/bank.go
+	solc --abi app/bank/single/contract/src/bank/bank.sol -o app/bank/single/contract/abi/bank --overwrite
+	solc --bin app/bank/single/contract/src/bank/bank.sol -o app/bank/single/contract/abi/bank --overwrite
+	abigen --bin=app/bank/single/contract/abi/bank/Bank.bin --abi=app/bank/single/contract/abi/bank/Bank.abi \
+	--pkg=bank --out=app/bank/single/contract/go/bank/bank.go
+
+bank-single-deploy:
+	CGO_ENABLED=0 go run app/bank/single/cmd/deploy/main.go
+
+# #######################################################################
 # Go-Ethereum Commands
 
 # Start in developer mode, open UNIX socket, http calls, and JSONRPC
