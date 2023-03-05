@@ -100,6 +100,10 @@ bank-single-build:
 bank-single-deploy:
 	CGO_ENABLED=0 go run app/bank/single/cmd/deploy/main.go
 
+bank-test:
+	cd app/bank/single/contract/go/bank; \
+	gotest . -v
+
 # #######################################################################
 # Go-Ethereum Commands
 
