@@ -142,6 +142,33 @@ bank-api-deploy:
 	CGO_ENABLED=0 go run app/bank/proxy/cmd/deploy/api/main.go
 
 # #######################################################################
+# Commands to execute API's against the bank smart contract.
+
+# Calls Bank Proxy Deposit function
+bank-proxy-deposit:
+	DEPOSIT_TARGET="account1" DEPOSIT_AMOUNT="120000" CGO_ENABLED=0 go run app/bank/proxy/cmd/deposit/main.go
+bank-proxy-balance:
+	BALANCE_TARGET="account1" CGO_ENABLED=0 go run app/bank/proxy/cmd/balance/main.go
+
+# Calls Bank Proxy Withdraw function
+bank-proxy-withdraw:
+	WITHDRAW_TARGET="account1" CGO_ENABLED=0 go run app/bank/proxy/cmd/withdraw/main.go
+
+# Loads the Bank Proxy account balance with values from various accounts
+bank-proxy-load:
+	DEPOSIT_TARGET="account1" DEPOSIT_AMOUNT="100000" CGO_ENABLED=0 go run app/bank/proxy/cmd/deposit/main.go
+	DEPOSIT_TARGET="account2" DEPOSIT_AMOUNT="110000" CGO_ENABLED=0 go run app/bank/proxy/cmd/deposit/main.go
+	DEPOSIT_TARGET="account3" DEPOSIT_AMOUNT="120000" CGO_ENABLED=0 go run app/bank/proxy/cmd/deposit/main.go
+	DEPOSIT_TARGET="account4" DEPOSIT_AMOUNT="130000" CGO_ENABLED=0 go run app/bank/proxy/cmd/deposit/main.go
+
+# Reads all account balances
+bank-proxy-balances:
+	BALANCE_TARGET="account1" CGO_ENABLED=0 go run app/bank/proxy/cmd/balance/main.go
+	BALANCE_TARGET="account2" CGO_ENABLED=0 go run app/bank/proxy/cmd/balance/main.go
+	BALANCE_TARGET="account3" CGO_ENABLED=0 go run app/bank/proxy/cmd/balance/main.go
+	BALANCE_TARGET="account4" CGO_ENABLED=0 go run app/bank/proxy/cmd/balance/main.go
+
+# #######################################################################
 # Go-Ethereum Commands
 
 # Start in developer mode, open UNIX socket, http calls, and JSONRPC

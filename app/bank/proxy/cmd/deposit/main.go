@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/big"
 	"os"
+	"strconv"
 
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/adamwoolhether/smartcontract/app/bank/proxy/contract/go/bank"
 	"github.com/adamwoolhether/smartcontract/foundation/ethereum"
@@ -14,8 +16,13 @@ import (
 )
 
 const (
-	keyStoreFile = "zarf/ethereum/keystore/UTC--2022-05-12T14-47-50.112225000Z--6327a38415c53ffb36c11db55ea74cc9cb4976fd"
-	passPhrase   = "123"
+	ownerStoreFile    = "zarf/ethereum/keystore/UTC--2022-05-12T14-47-50.112225000Z--6327a38415c53ffb36c11db55ea74cc9cb4976fd"
+	account1StoreFile = "zarf/ethereum/keystore/UTC--2022-05-13T16-57-20.203544000Z--8e113078adf6888b7ba84967f299f29aece24c55"
+	account2StoreFile = "zarf/ethereum/keystore/UTC--2022-05-13T16-59-42.277071000Z--0070742ff6003c3e809e78d524f0fe5dcc5ba7f7"
+	account3StoreFile = "zarf/ethereum/keystore/UTC--2022-09-16T16-13-42.375710134Z--7fdfc99999f1760e8dbd75a480b93c7b8386b79a"
+	account4StoreFile = "zarf/ethereum/keystore/UTC--2022-09-16T16-13-55.707637523Z--000cf95cb5eb168f57d0befcdf6a201e3e1acea9"
+
+	passPhrase = "123" // All three accounts use the same passphrase
 )
 
 var coinMarketCapKey = os.Getenv("CMC_API_KEY")
@@ -30,13 +37,33 @@ func main() {
 func run() (err error) {
 	ctx := context.Background()
 
+	depositAmount := os.Getenv("DEPOSIT_AMOUNT")
+	depositTarget := os.Getenv("DEPOSIT_TARGET")
+	var ethAccount string
+
+	// Validate the deposit target is valid.
+	switch depositTarget {
+	case "owner":
+		ethAccount = ownerStoreFile
+	case "account1":
+		ethAccount = account1StoreFile
+	case "account2":
+		ethAccount = account2StoreFile
+	case "account3":
+		ethAccount = account3StoreFile
+	case "account4":
+		ethAccount = account4StoreFile
+	default:
+		ethAccount = account1StoreFile
+	}
+
 	backend, err := ethereum.CreateDialedBackend(ctx, ethereum.NetworkHTTPLocalhost)
 	if err != nil {
 		return err
 	}
 	defer backend.Close()
 
-	privateKey, err := ethereum.PrivateKeyByKeyFile(keyStoreFile, passPhrase)
+	privateKey, err := ethereum.PrivateKeyByKeyFile(ethAccount, passPhrase)
 	if err != nil {
 		return err
 	}
@@ -78,9 +105,13 @@ func run() (err error) {
 
 	// =========================================================================
 
+	valueGwei, err := strconv.ParseFloat(depositAmount, 64)
+	if err != nil {
+		return fmt.Errorf("converting deposit amount to float: %v", err)
+	}
+
 	const gasLimit = 1600000
 	const gasPriceGwei = 39.576
-	const valueGwei = 0.0
 	tranOpts, err := clt.NewTransactOpts(ctx, gasLimit, currency.GWei2Wei(big.NewFloat(gasPriceGwei)), big.NewFloat(valueGwei))
 	if err != nil {
 		return err
@@ -88,25 +119,29 @@ func run() (err error) {
 
 	// =========================================================================
 
-	address, tx, _, err := bank.DeployBank(tranOpts, clt.Backend)
+	contractIDBytes, err := os.ReadFile("zarf/ethereum/bank.cid")
+	if err != nil {
+		return fmt.Errorf("importing bank.cid file: %w", err)
+	}
+
+	contractID := string(contractIDBytes)
+	if contractID == "" {
+		return errors.New("need to export the bank.cid file")
+	}
+	fmt.Println("contractID:", contractID)
+
+	proxyContract, err := bank.NewBank(common.HexToAddress(contractID), clt.Backend)
+	if err != nil {
+		return fmt.Errorf("new proxy connection: %w", err)
+	}
+
+	tx, err := proxyContract.Deposit(tranOpts)
 	if err != nil {
 		return err
 	}
 	fmt.Print(converter.FmtTransaction(tx))
 
-	fmt.Println("\nContract Details")
-	fmt.Println("----------------------------------------------------")
-	fmt.Println("contract id     :", address.Hex())
-
-	if err := os.WriteFile("zarf/ethereum/bank.cid", []byte(address.Hex()), 0644); err != nil {
-		return fmt.Errorf("exporting bank.cid file: %w", err)
-	}
-
 	// =========================================================================
-
-	fmt.Println("\nWaiting Logs")
-	fmt.Println("----------------------------------------------------")
-	log.Root().SetHandler(log.StdoutHandler)
 
 	receipt, err := clt.WaitMined(ctx, tx)
 	if err != nil {
