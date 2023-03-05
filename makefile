@@ -128,12 +128,12 @@ bank-api-v2-build:
 	abigen --bin=app/bank/proxy/contract/abi/bankapi/BankAPI.bin --abi=app/bank/proxy/contract/abi/bankapi/BankAPI.abi \
 	--pkg=bankapi --out=app/bank/proxy/contract/go/bankapi/bankapi.go
 
-bank-api-v3-build:
-	mkdir -p app/bank/proxy/contract/go/bankapi/
-	solc --abi app/bank/proxy/contract/src/bankapi/v3/api.sol -o app/bank/proxy/contract/abi/bankapi --overwrite
-	solc --bin app/bank/proxy/contract/src/bankapi/v3/api.sol -o app/bank/proxy/contract/abi/bankapi --overwrite
-	abigen --bin=app/bank/proxy/contract/abi/bankapi/BankAPI.bin --abi=app/bank/proxy/contract/abi/bankapi/BankAPI.abi \
-	--pkg=bankapi --out=app/bank/proxy/contract/go/bankapi/bankapi.go
+#bank-api-v3-build:
+#	mkdir -p app/bank/proxy/contract/go/bankapi/
+#	solc --abi app/bank/proxy/contract/src/bankapi/v3/api.sol -o app/bank/proxy/contract/abi/bankapi --overwrite
+#	solc --bin app/bank/proxy/contract/src/bankapi/v3/api.sol -o app/bank/proxy/contract/abi/bankapi --overwrite
+#	abigen --bin=app/bank/proxy/contract/abi/bankapi/BankAPI.bin --abi=app/bank/proxy/contract/abi/bankapi/BankAPI.abi \
+#	--pkg=bankapi --out=app/bank/proxy/contract/go/bankapi/bankapi.go
 
 bank-proxy-deploy:
 	CGO_ENABLED=0 go run app/bank/proxy/cmd/deploy/bank/main.go
