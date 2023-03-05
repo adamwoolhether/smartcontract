@@ -58,6 +58,14 @@ library Error {
         return string(bstr);
     }
 
+    // Booltoa converts a bool to string.
+    function Booltoa(bool x) internal pure returns (string memory) {
+        if (x) {
+            return "true";
+        }
+        return "false";
+    }
+
     // Addrtoa converts an address to a string.
     function Addrtoa(address x) internal pure returns (string memory) {
         bytes memory s = new bytes(40);
