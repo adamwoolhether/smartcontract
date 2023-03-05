@@ -91,7 +91,7 @@ basic-test:
 # Commands to build, deploy, & run the bank-single smart contracts.
 
 bank-single-build:
-	mkdir -p app/bank/single/contract/go/bank.go
+	mkdir -p app/bank/single/contract/go/bank
 	solc --abi app/bank/single/contract/src/bank/bank.sol -o app/bank/single/contract/abi/bank --overwrite
 	solc --bin app/bank/single/contract/src/bank/bank.sol -o app/bank/single/contract/abi/bank --overwrite
 	abigen --bin=app/bank/single/contract/abi/bank/Bank.bin --abi=app/bank/single/contract/abi/bank/Bank.abi \
