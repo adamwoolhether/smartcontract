@@ -175,6 +175,122 @@ contract Book {
     }
 
     // ReconcileBet allows a moderator to reconcile a bet.
+    function ReconcileBet(
+        string      memory   betID,     // Unique Bet identifier
+        uint                 nonce,     // Nonce used by moderator for signing
+        bytes       calldata signature, // Moderator signature
+        address[]   memory   winners    // List of winner addresses
+    ) onlyOwner public {
+        // Capture the bet information.
+        Bet storage bet = bets[betID];
+
+        // Ensure the bet is live.
+        if (bet.Info.State != STATE_LIVE) {
+            REVERT("bet is not live");
+        }
+
+        // Ensure the bet has passed its expiration.
+        if (block.timestamp < bet.Info.Expiration) {
+            revert(string.concat("bet has not yet expired : block.timestamp[", Error.Itoa(block.timestamp), "] expiration[", Error.Itoa(bet.Info.Expiration), "]"));
+        }
+
+        // Ensure the none used by the moderator is the expected nonce.
+        if (accounts[bet.Info.Moderator].Nonce != nonce) {
+            revert("invalid moderator nonce");
+        }
+
+        // Reconstruct the data that was signed by the moderator.
+        bytes32 hashData = keccak256(abi.encode(betID, bet.Info.Moderator, nonce));
+
+        // Retrieve the moderator's public address from the signature.
+        (address mod, Error.Err memory err) = extractAddress(hashData, signature);
+        if (err.isError) {
+            revert(err.msg);
+        }
+
+        // Ensure the moderator on file for the bet is the one that
+        // signed to reconcile the bet.
+        if (mod != bet.Info.Moderator) {
+            revert("invalid moderator signature");
+        }
+
+        // Ensure each of the winners exist in the participation list.
+        for (uint i = 0; i < winners.length; i++) {
+            if (!bet.IsParticipant[winners[i]]) {
+                revert("winner address is not a participant");
+            }
+        }
+
+        // Calculate the total winnings for each winner.
+        uint256 totalWinnings   = bet.Info.AmountBetWei * 2; /////////////////////////////
+        uint256 amountPerWinner = totalWinnings / winners.length;
+
+        // Give each of the winners the amount listed in the bet.
+        for (uint i = 0; i < winners.length; i++) {
+            accounts[winners[i]].Balance += amountPerWinner;
+        }
+
+        // Increment the moderator's nonce.
+        accounts[bet.Info.Moderator].Nonce++;
+
+        // Change the state of the bet to reconcile and set the amount to zero.
+        bet.Info.State        = STATE_RECONCILED;
+        bet.Info.AmountBetWei = 0;
+
+        emit EventLog(string.concat(betID, " has been reconciled"));
+    }
+
+    // CancelBetModerator allows the moderator to cancel the bet at any time.
+    function CancelBetModerator(
+        string  memory    betID,
+        uint256           amountFeeWei,
+        uint              nonce,
+        bytes   calldata  signature
+    ) onlyOwner public {
+        // Capture the bet information.
+        Bet storage bet = bets[betID];
+
+        // Ensure the bet is live.
+        if (bet.Info.State != STATE_LIVE) {
+            REVERT("bet is not live");
+        }
+
+        // Ensure the none used by the moderator is the expected nonce.
+        if (accounts[bet.Info.Moderator].Nonce != nonce) {
+            revert("invalid moderator nonce");
+        }
+
+        // Reconstruct the data that was signed by the moderator.
+        bytes32 hashData = keccak256(abi.encode(betID, bet.Info.Moderator, nonce));
+
+        // Retrieve the moderator's public address from the signature.
+        (address mod, Error.Err memory err) = extractAddress(hashData, signature);
+        if (err.isError) {
+            revert(err.msg);
+        }
+
+        // Ensure the moderator on file for the bet is the one that
+        // signed to reconcile the bet.
+        if (mod != bet.Info.Moderator) {
+            revert("invalid moderator signature");
+        }
+
+        // Return the money back to the participants minus the fee.
+        uint256 totalAmount = bet.Info.AmountBetWei - amountFeeWei;
+        for (uint i = 0; i < bet.Info.Participants.length; i++) {
+            accounts[bet.Info.Participants[i]].Balance += totalAmount;
+            accounts[Owner].Balance += amountFeeWei;
+        }
+
+        // Increment the moderators nonce.
+        accounts[bet.Info.Moderator].Nonce++;
+
+        // Change the state of the bet to cancelled and set the amount to zero.
+        bet.Info.State        = STATE_CANCELLED;
+        bet.Info.AmountBetWei = 0;
+
+        emit EventLog(string.concat(betID, " has been cancelled by moderator"));
+    }
 
     // /////////////////////////////////////////////////////////////
     // Private Functions
