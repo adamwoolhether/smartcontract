@@ -355,6 +355,33 @@ contract Book {
         emit EventLog(string.concat(betID, " has been cancelled by all participants"));
     }
 
+    // CancelBetOwner allows the owner to cancel a bet at any time.
+    function CancelBetOwner(
+        string  memory    betID,
+        uint256           amountFeeWei
+    ) onlyOnwer public {
+        // Capture the bet information.
+        Bet storage bet = bets[betID];
+
+        // Ensure the bet is live.
+        if (bet.Info.State != STATE_LIVE) {
+            REVERT("bet is not live");
+        }
+
+        // Return the money back to the participants minus the fee.
+        uint256 totalAmount = bet.Info.AmountBetWei - amountFeeWei;
+        for (uint i = 0; i < bet.Info.Participants.length; i++) {
+            accounts[bet.Info.Participants[i]].Balance += totalAmount;
+            accounts[Owner].Balance += amountFeeWei;
+        }
+
+        // Change the state of the bet to cancelled and set the amount to zero.
+        bet.Info.State        = STATE_CANCELLED;
+        bet.Info.AmountBetWei = 0;
+
+        emit EventLog(string.concat(betID, " has been cancelled by owner"));
+    }
+
     // /////////////////////////////////////////////////////////////
     // Private Functions
 
