@@ -245,7 +245,7 @@ contract Book {
         string  memory    betID,
         uint256           amountFeeWei,
         uint              nonce,
-        bytes   calldata  signature
+        bytes   calldata  signatures
     ) onlyOwner public {
         // Capture the bet information.
         Bet storage bet = bets[betID];
@@ -263,8 +263,8 @@ contract Book {
         // Reconstruct the data that was signed by the moderator.
         bytes32 hashData = keccak256(abi.encode(betID, bet.Info.Moderator, nonce));
 
-        // Retrieve the moderator's public address from the signature.
-        (address mod, Error.Err memory err) = extractAddress(hashData, signature);
+        // Retrieve the moderator's public address from the signatures.
+        (address mod, Error.Err memory err) = extractAddress(hashData, signatures);
         if (err.isError) {
             revert(err.msg);
         }
@@ -290,6 +290,69 @@ contract Book {
         bet.Info.AmountBetWei = 0;
 
         emit EventLog(string.concat(betID, " has been cancelled by moderator"));
+    }
+
+    // CancelBetParticipants allow all the participants to cancel a bet.
+    function CancelBetParticipants(
+        string  memory    betID,
+        uint256           amountFeeWei,
+        uint              nonce,
+        bytes   calldata  signatures
+    ) onlyOwner public {
+        // Capture the bet information.
+        Bet storage bet = bets[betID];
+
+        // Ensure the bet is live.
+        if (bet.Info.State != STATE_LIVE) {
+            REVERT("bet is not live");
+        }
+
+        // Ensure we have the proper amount of signatures and nonces.
+        if ((bet.Info.Participants.length != signatures.length) || (bet.Info.Participants.length != nonces.length)) {
+            revert("invalid number of signatures or nonces");
+        }
+
+        // Validate the signatures from all the participants.
+        for (uint i = 0; i < bet.Info.Participants.length; i++) {
+            address         participant = bet.Info.Participants[i];
+            uint            nonce       = nonces[i];
+            bytes calldata  signature   = signatures[i];
+
+            // Ensure the nonce used by the participant is the expected nonce.
+            if (accounts[participant].Nonce != none) {
+                revert(string.concat(Error.Addrtoa(participant), "] has an invalid nonce"));
+            }
+
+            // Reconstruct the data that was signed by the participant.
+            bytes32 hashData = keccak256(abi.encode(betID, participant, nonce));
+
+            // Retrieve the participants public address from the signature.
+            (address addr, Error.Err memory err) = extractAddress(hashData, signature);
+            if (err.isError) {
+                revert(err.msg);
+            }
+
+            // Ensure the participant's signature matches the address of the file.
+            if (addr != participant) {
+                revert(string.concat(Error.Addrtoa(participant), " address doesn't match signature"));
+            }
+
+            // Increment the nonce value for this participant.
+            accounts[participant].Nonce++;
+        }
+
+        // Return the money back to the participants minus the fee.
+        uint256 totalAmount = bet.Info.AmountBetWei - amountFeeWei;
+        for (uint i = 0; i < bet.Info.Participants.length; i++) {
+            accounts[bet.Info.Participants[i]].Balance += totalAmount;
+            accounts[Owner].Balance += amountFeeWei;
+        }
+
+        // Change the state of the bet to cancelled and set the amount to zero.
+        bet.Info.State        = STATE_CANCELLED;
+        bet.Info.AmountBetWei = 0;
+
+        emit EventLog(string.concat(betID, " has been cancelled by all participants"));
     }
 
     // /////////////////////////////////////////////////////////////
